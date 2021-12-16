@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Compras</title>
+</head>
+<body>
+  
+  <ul id="lista"></ul>
+
+  <form>
+    <input type="text" id="item" name="name" />
+    <input type="submit" id="btnSalvarItem" value="salvar"/>
+  </form>
+
+  <script>
+    const lista = document.querySelector('#lista')
+    const btnSalvarItem = document.querySelector('#btnSalvarItem')
+    const campoTextoItem = document.querySelector('#item')
+
+    let listaItens = JSON.parse(localStorage.getItem('lista-itens')) || []
+
+    const adicionarItem = () => {
+      listaItens.push(campoTextoItem.value)
+      window.localStorage.setItem('lista-itens', JSON.stringify(listaItens))
+    }
+
+    const listarItens = () => {
+      lista.innerHTML = ''
+      listaItens.forEach(element => {
+        lista.innerHTML += `<li>${element}</li>`
+      })
+    }
+
+    btnSalvarItem.addEventListener('click', (e) => {
+      e.preventDefault()
+      adicionarItem()
+      listarItens()
+      campoTextoItem.value = ''
+    })
+
+    listarItens()
+
+  </script>
+
+</body>
+</html>
