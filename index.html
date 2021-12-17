@@ -5,15 +5,125 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista de Compras</title>
-</head>
-<body>
-  
-  <ul id="lista"></ul>
+  <style>
+    :root{
+      --background: #d6d6d6;
+      --text-color: rgb(59, 59, 59);
+      --list-border: rgb(226, 226, 226);
+      --list-background: rgb(243, 243, 243);
+      --list-text-color: #333;
+    }
+    body{
+      margin:0;
+      padding: 0;
+      min-height: 100vh;
+      background:var(--background);
+      display: flex;
+      justify-content: baseline;
+      align-items: center;
+      font-family: Roboto, Helvetica, sans-serif;
+      flex-direction: column;
+      min-width: 100vw;
+      font-size: 16px;
+    }
 
-  <form>
-    <input type="text" id="item" name="name" />
-    <input type="submit" id="btnSalvarItem" value="salvar"/>
-  </form>
+    h1, p, ul{color:var(--text-color)}
+
+    ul{margin:0; padding:0; min-width: 100vw; }
+    li{
+      color:var(--list-text-color);
+      box-sizing: border-box;
+      list-style: none;
+      background-color:var(--list-background);
+      padding: 10px;
+      display: flex; 
+      justify-content:space-between;
+      gap:10px;
+                 
+    }
+
+    li .list-text{      
+      flex-grow: 1;
+    }
+
+    li .list-check-icon{      
+      background-color:#333;
+      mask-image: url('assets/img/blank_check_box_icon.svg');      
+      mask-size: cover;
+      -webkit-mask-image: url('assets/img/blank_check_box_icon.svg');      
+      -webkit-mask-size: cover;
+      display: block;
+      width: 24px;
+      height: 24px;      
+    }
+
+    li .list-remove-icon{      
+      background-color:rgb(155, 0, 0);
+      mask-image: url('assets/img/circle_remove_icon.svg');      
+      mask-size: cover;
+      -webkit-mask-image: url('assets/img/circle_remove_icon.svg');      
+      -webkit-mask-size: cover;
+      display: block;
+      width: 24px;
+      height: 24px;      
+    }
+
+    li.checked{
+      color:rgb(4, 112, 0);
+      text-decoration: line-through;
+    }
+
+    li[data-status="checked"] .list-check-icon{      
+      background-color:rgb(4, 112, 0);
+      mask-image: url('assets/img/box_check_icon.svg');            
+      -webkit-mask-image: url('assets/img/box_check_icon.svg');            
+    }
+
+    li+li{
+      border-top: 1px solid var(--list-border);
+    }
+
+    #lista{
+      margin-bottom: 10px;
+    }
+
+    form{
+      position: sticky;      
+      top:0;
+      width: 100vw;
+      display: block;
+      background-color:white;
+      padding: 10px;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: space-around;      
+      align-items: stretch;    
+      z-index: 1;  
+    }
+        
+    input{
+      box-sizing: border-box;
+      padding:10px;
+      border:1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    input[type="submit"]{
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>  
+  
+    <h1>Lista de Compras</h1>
+
+    <form>
+      <input type="text" id="item" name="name" />
+      <input type="submit" id="btnSalvarItem" value="salvar"/>      
+    </form>
+
+    <ul id="lista"></ul>
 
   <script>
     const lista = document.querySelector('#lista')
@@ -23,14 +133,45 @@
     let listaItens = JSON.parse(localStorage.getItem('lista-itens')) || []
 
     const adicionarItem = () => {
-      listaItens.push(campoTextoItem.value)
-      window.localStorage.setItem('lista-itens', JSON.stringify(listaItens))
+      if(campoTextoItem.value){
+        var item = {}      
+        item.value = campoTextoItem.value
+        item.status = 'pending'
+        listaItens.push(item)
+        window.localStorage.setItem('lista-itens', JSON.stringify(listaItens))
+      }
+    }
+
+    const checkItem = (el) => {                  
+      let listItem = el.parentElement
+      let index = listItem.getAttribute('data-index')
+      let status = listItem.getAttribute('data-status')
+
+      if(status === 'pending'){
+        listaItens[index].status = 'checked'
+      }else{
+        listaItens[index].status = 'pending'
+      }
+      window.localStorage.setItem('lista-itens', JSON.stringify(listaItens))    
+      listarItens()
+    }
+
+    const removeItem = (el) => {            
+      let listItem = el.parentElement
+      let index = listItem.getAttribute('data-index')
+      listaItens.splice(index,1)      
+      window.localStorage.setItem('lista-itens', JSON.stringify(listaItens))    
+      listarItens()      
     }
 
     const listarItens = () => {
-      lista.innerHTML = ''
-      listaItens.forEach(element => {
-        lista.innerHTML += `<li>${element}</li>`
+      lista.innerHTML = ''      
+      listaItens.forEach((element, index) => {        
+        lista.innerHTML += `<li data-index="${index}" data-value="${element.value}" data-status="${element.status}">
+          <span class="list-text">${element.value}</span>
+          <span class="list-check-icon" onclick="checkItem(this)"></span>
+          <span class="list-remove-icon" onclick="removeItem(this)"></span>
+        </li>`
       })
     }
 
